@@ -92,10 +92,8 @@
       </div>
     </section>
 
-    <section class="card" style="margin-top:16px">
-      <h3 style="margin:0 0 8px">Notes</h3>
-      <p class="note">This is a single-file app. It saves your settings and checkboxes locally in your browser (no servers).</p>
-      <p class="note">Morning start 10:30 • Afternoon 3:00 • Evening 8:00. Med ball slams are reduced if soreness appears; right suitcase carry slightly shorter. FlexBar and scoliosis leans included in evenings.</p>
+    $1
+      <p class="note" id="motivation"></p>
     </section>
   </div>
 
@@ -128,7 +126,27 @@
     }catch(e){ /* ignore */ }
   })();
 
-  // ---------- Utilities ----------
+  // ---------- Motivation Quotes ----------
+  const QUOTES = [
+    "Every rep is a step toward balance — today’s effort makes tomorrow easier.",
+    "Stronger shoulders, steadier spine. You’re building the foundation for your tennis.",
+    "Don’t rush. Quality over quantity — clean reps last.",
+    "This isn’t just exercise — it’s a reset for your alignment.",
+    "Left and right are learning to work together. That’s progress.",
+    "Small corrections now pay off huge later.",
+    "Patience. Consistency. Balance. That’s the winning combo.",
+    "Own the tempo — smooth, controlled, repeatable.",
+    "Balance first, power follows.",
+    "Show up, check the boxes, keep moving forward."
+  ];
+  function pickQuote(dateISO, session, week){
+    const sessionIdx = {Morning:0,Afternoon:1,Evening:2}[session] ?? 0;
+    const dayIdx = new Date(dateISO+"T00:00:00").getDay();
+    const seed = week*13 + dayIdx*3 + sessionIdx;
+    return QUOTES[ seed % QUOTES.length ];
+  }
+
+  $1
   const DEFAULT_START = "2025-09-08"; // Monday (Week 1)
   const isoToday = () => new Date().toISOString().slice(0,10);
   const weekday = (iso) => ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date(iso+"T00:00:00").getDay()];
@@ -258,17 +276,10 @@
     render();
   }
 
-  function render(){
-    const startISO = elStart.value || DEFAULT_START;
-    const dateISO = elDate.value || isoToday();
-    const day = weekday(dateISO);
-    const w = diffWeeks(startISO, dateISO);
-    const phase = phaseForWeek(w);
-
-    document.title = `Michael – ${day} ${elSession.value}`;
-    elPhaseLine.textContent = `Week ${w} • ${phase.name}`;
-    elPhaseName.textContent = `Today: ${day} • Session: ${elSession.value}`;
-    elToday.textContent = new Date(dateISO+"T00:00:00").toDateString();
+  $1
+    // Set motivational line
+    const mot = document.getElementById('motivation');
+    if (mot) mot.textContent = pickQuote(dateISO, elSession.value, w);
 
     const plan = PLAN[day] || {};
     const tasks = plan[elSession.value] || ["No items defined for this session."];
