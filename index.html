@@ -1,68 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Michael – Therapy & Tennis Planner</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Michael – Therapy & Tennis Planner (Interactive)</title>
+  <meta name="theme-color" content="#0ea5e9" />
   <style>
-    body {font-family: Arial, sans-serif; background:#101820; color:#f5f5f5; margin:0; padding:0;}
-    header {padding:20px; text-align:center; background:#0a0f1a;}
-    h1 {margin:0; font-size:26px;}
-    .container {padding:20px; max-width:900px; margin:auto;}
-    .card {background:#182533; padding:20px; border-radius:12px; margin-bottom:20px;}
-    iframe {width:100%; height:315px; border:none; border-radius:8px;}
-    .quote {font-style:italic; margin:15px 0; padding:10px; border-left:4px solid #22c55e;}
-    a {color:#22c55e; text-decoration:none;}
-    a:hover {text-decoration:underline;}
+    :root{--bg:#0b1220;--card:#121a2b;--muted:#8aa0c7;--text:#e9f1ff;--line:#1f2a44}
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#0b1220,#0a0f1a 60%);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    a{color:#9ad0ff}
+    header{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;padding:16px 20px}
+    h1{margin:0;font-size:26px}
+    .sub{color:var(--muted);font-size:13px;margin-top:4px}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    .card{background:radial-gradient(1200px 600px at -10% -20%,#1b2947 0%,transparent 50%),var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+    .row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+    input,select,button{background:#0e1729;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+    button{cursor:pointer}
+    .pill{display:inline-block;padding:6px 10px;border:1px solid var(--line);border-radius:999px;font-size:12px;margin:4px 6px 0 0;color:#cfe3ff}
+    .h3{font-weight:700;margin:0 0 8px}
+    .tasks{display:grid;grid-template-columns:1fr;gap:8px}
+    .task{display:flex;gap:10px;align-items:flex-start;background:#0e1729;border:1px solid var(--line);padding:10px;border-radius:10px}
+    .task input{margin-top:4px}
+    .muted{color:#b9c7e5;font-size:13px}
+    .note{margin:6px 0 0;color:#cfd9f7}
+    .progress{height:8px;background:#0e1729;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,#34d399,#0ea5e9)}
+    .section-title{display:flex;align-items:center;justify-content:space-between}
+    .section-title small{color:var(--muted)}
+    .video-wrap{position:relative;width:100%;aspect-ratio:16/9;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#000}
+    .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:900px){.row{grid-template-columns:1fr} .grid-2{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <header>
-    <h1>Michael – Therapy & Tennis Planner</h1>
-    <p>Week ? • Phase ?</p>
-    <p>Scoliosis cues: Thoracic → lean RIGHT (opens LEFT), Lumbar → lean LEFT (opens RIGHT)</p>
+    <div>
+      <h1>Michael – Therapy & Tennis Planner</h1>
+      <div class="sub" id="phaseLine">Week ? • Phase ?</div>
+    </div>
+    <div class="sub">Scoliosis cues: Thoracic → lean <b>RIGHT</b> (opens LEFT) • Lumbar → lean <b>LEFT</b> (opens RIGHT)</div>
   </header>
 
-  <div class="container">
-    <div class="card">
-      <h2>Session Controls</h2>
-      <p>
-        <button>Copy session</button>
-        <button>Print / Save PDF</button>
-        <button>Reset checkboxes</button>
-      </p>
-      <p>Serve cap: 15–20 (quality over volume) • Stop if pain > 3/10 • Heat → (Optional) TENS → Stretch</p>
-    </div>
+  <div class="wrap">
+    <section class="card">
+      <div class="row">
+        <label>Program Start
+          <input type="date" id="start" />
+        </label>
+        <label>Date
+          <input type="date" id="date" />
+        </label>
+        <label>Session
+          <select id="session">
+            <option>Morning</option>
+            <option>Afternoon</option>
+            <option>Evening</option>
+          </select>
+        </label>
+      </div>
+      <div style="margin-top:10px" class="grid-2">
+        <div>
+          <div class="progress"><div class="bar" id="bar"></div></div>
+          <small id="pct" class="muted">0% complete</small>
+        </div>
+        <div style="text-align:right">
+          <button id="copyBtn">Copy session</button>
+          <button id="printBtn">Print / Save PDF</button>
+          <button id="resetBtn">Reset checkboxes</button>
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <span class="pill">Serve cap: 15–20 (quality over volume)</span>
+        <span class="pill">Stop if pain &gt; 3/10</span>
+        <span class="pill">Heat → (Optional) TENS → Stretch</span>
+      </div>
+    </section>
 
-    <div class="card">
-      <h2>Motivational Notes</h2>
-      <div id="quoteBox" class="quote"></div>
-    </div>
+    <section class="card">
+      <div class="section-title">
+        <div class="h3" id="todayLine">Today</div>
+        <small id="phaseName">Phase</small>
+      </div>
+      <div class="tasks" id="tasks"></div>
+    </section>
 
-    <div class="card">
-      <h2>Therapy Videos</h2>
-      <iframe src="https://www.youtube.com/embed/videoseries?list=PLYHDe9FV2FzGePhTGZv21eKo_olmBog4I" allowfullscreen></iframe>
-      <p style="margin-top:10px">
-        Prefer the YouTube app? 
-        <a href="https://www.youtube.com/playlist?list=PLYHDe9FV2FzGePhTGZv21eKo_olmBog4I" target="_blank" rel="noopener">
-          Open full playlist in YouTube
-        </a>.
-      </p>
-    </div>
+    <section class="card">
+      <div class="section-title">
+        <div class="h3">Notes & Motivation</div>
+        <small>Rotates on refresh • iOS: tap Play on videos</small>
+      </div>
+      <p class="note" id="motivation"></p>
+      <p class="note">Install tip (iPhone): Share ▶︎ "Add to Home Screen" for app-like use.</p>
+    </section>
+
+    <section class="card">
+      <div class="section-title"><div class="h3">Videos</div><small>Embedded playlist</small></div>
+      <div class="video-wrap">
+        <iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/videoseries?list=PLYHDe9FV2FzGePhTGZv21eKo_olmBog4I&rel=0&modestbranding=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen title="Therapy Playlist"></iframe>
+      </div>
+      <p class="note">Prefer the YouTube app? <a href="https://www.youtube.com/playlist?list=PLYHDe9FV2FzGePhTGZv21eKo_olmBog4I" target="_blank" rel="noopener">Open full playlist in YouTube</a>.</p>
+    </section>
   </div>
 
   <script>
-    // Rotating motivational quotes
-    const quotes = [
-      "“Progress is progress, no matter how small. Every rep gets you closer to balance.”",
-      "“Your strength is built one disciplined day at a time—stay consistent.”",
-      "“Small steps each day add up to big changes—stay patient.”",
-      "“Balance takes time, but effort today builds strength for tomorrow.”",
-      "“You don’t need to be perfect, just a little better than yesterday.”"
+    // ---------- Program Data ----------
+    const PROGRAM = {
+      phases:[
+        {name:"Phase 1 – Reset & Pain Control", weeks:[1,2], goals:["Calm pain/irritability","Restore scapular rhythm","Thoracic/Lumbar directional breathing"]},
+        {name:"Phase 2 – Mobility & Stability", weeks:[3,4], goals:["Improve T-spine mobility","Serratus + lower trap control","Hip/QL balance"]},
+        {name:"Phase 3 – Strength & Asymmetry", weeks:[5,6], goals:["Unilateral strength bias to L","Rotator cuff endurance","Kettlebell carries & hip control"]},
+        {name:"Phase 4 – Power & Integration", weeks:[7,8], goals:["Serve power return","Med-ball & elastic speed","Full tennis integration"]}
+      ],
+      sessions:{
+        Morning:[
+          {t:"Foam roller T-spine opener", r:"2×8"},
+          {t:"Band pull‑aparts", r:"2×12"},
+          {t:"Cat–cow", r:"1×8"},
+          {t:"Pallof press", r:"3×10/side (2s hold)"},
+          {t:"Side plank 20–30s/side (push floor; avoid shoulder sink)", r:"3×"},
+          {t:"Hip hikes (right pelvis control)", r:"3×12/side"},
+          {t:"Suitcase carries (L heavier; R light/strict)", r:"3×30–40s/side"},
+          {t:"Serratus wall slides", r:"3×10"},
+          {t:"Prone Y/T/W holds", r:"2×8 each (2s)"},
+          {t:"Cool‑down: T‑spine lean RIGHT 2×20–30s; Lumbar lean LEFT 2×20–30s; 90/90 hip lift w/ reach 5 breaths ×2"}
+        ],
+        Afternoon:[
+          {t:"Warm‑up: roller, serratus punches, band ER, side plank reach‑through, 5 shadow serves"},
+          {t:"Groundstrokes: rally quality; posture & footwork"},
+          {t:"Serve practice: 10–15 reps max; half‑speed if needed"},
+          {t:"Shadow serves with band 2×10 (scap upward rotation rhythm)"},
+          {t:"Mini‑breaks every 5–7 serves to reset shoulder"}
+        ],
+        Evening:[
+          {t:"Infrared heating pad 10–15 min (R shoulder & upper back)"},
+          {t:"Concave‑side opens: Thoracic → lean RIGHT; Lumbar → lean LEFT (2×20–30s each)"},
+          {t:"90/90 hip lift with reach — 5 breaths ×2–3 sets"},
+          {t:"Band ER 2×10 (very light) + Serratus wall slides 2×8 (easy)"}
+        ]
+      }
+    };
+
+    const QUOTES = [
+      "Progress compounds: consistency beats intensity.",
+      "Balance first, power second.",
+      "Exhale into the left rib cage; let the right shoulder climb.",
+      "Own the position, then own the load.",
+      "Quality over volume—every rep is a rep of coordination."
     ];
-    const quoteBox = document.getElementById("quoteBox");
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    quoteBox.textContent = randomQuote;
+
+    // ---------- Element Refs ----------
+    const elStart = document.getElementById('start');
+    const elDate = document.getElementById('date');
+    const elSession = document.getElementById('session');
+    const elTasks = document.getElementById('tasks');
+    const elPhaseLine = document.getElementById('phaseLine');
+    const elPhaseName = document.getElementById('phaseName');
+    const elToday = document.getElementById('todayLine');
+    const elMotivation = document.getElementById('motivation');
+    const elBar = document.getElementById('bar');
+    const elPct = document.getElementById('pct');
+
+    // ---------- Helpers ----------
+    const iso = d=> new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+    const isoToday = ()=> iso(new Date());
+    const weekday = d=> new Date(d+"T00:00:00").toLocaleDateString(undefined,{weekday:'long'});
+    const diffWeeks = (start,day)=> Math.max(1, Math.floor((new Date(day)-new Date(start))/(7*864e5))+1);
+    function phaseForWeek(w){
+      for(const p of PROGRAM.phases){ if(w>=p.weeks[0] && w<=p.weeks[1]) return p; }
+      return PROGRAM.phases[PROGRAM.phases.length-1];
+    }
+
+    // ---------- Render ----------
+    function render(){
+      const startISO = elStart.value || (()=>{const d=new Date(); d.setDate(d.getDate()-d.getDay()); return iso(d);})();
+      const dateISO = elDate.value || isoToday();
+      const day = weekday(dateISO);
+      const w = diffWeeks(startISO, dateISO);
+      const phase = phaseForWeek(w);
+
+      document.title = `Michael – ${day} ${elSession.value}`;
+      elPhaseLine.textContent = `Week ${w} • ${phase.name}`;
+      elPhaseName.textContent = `${phase.name}`;
+      elToday.textContent = `${day} – ${dateISO}`;
+
+      // Motivation (rotate each load)
+      elMotivation.textContent = QUOTES[Math.floor(Math.random()*QUOTES.length)];
+
+      // Build tasks
+      const items = PROGRAM.sessions[elSession.value] || [];
+      elTasks.innerHTML = '';
+      items.forEach((it,i)=>{
+        const id = `t_${elSession.value}_${i}`.replace(/\s+/g,'_');
+        const row = document.createElement('div'); row.className='task';
+        row.innerHTML = `<input type="checkbox" id="${id}"><label for="${id}"><b>${it.t}</b>${it.r?`<div class='muted'>${it.r}</div>`:''}</label>`;
+        elTasks.appendChild(row);
+      });
+
+      // Restore checkbox state (per day+session)
+      const key = `ml_checks_${dateISO}_${elSession.value}`;
+      const saved = JSON.parse(localStorage.getItem(key)||'[]');
+      [...elTasks.querySelectorAll('input[type=checkbox]')].forEach((c,i)=> c.checked = !!saved[i]);
+
+      updateProgress();
+      saveState();
+    }
+
+    function updateProgress(){
+      const checks = elTasks.querySelectorAll('input[type=checkbox]');
+      const done = [...checks].filter(c=>c.checked).length;
+      const pct = checks.length? Math.round(100*done/checks.length):0;
+      elBar.style.width = pct+'%';
+      elPct.textContent = `${pct}% complete`;
+    }
+
+    // ---------- State ----------
+    function saveState(){
+      const state = {
+        start: elStart.value,
+        date: elDate.value,
+        session: elSession.value
+      };
+      localStorage.setItem('ml_planner_state', JSON.stringify(state));
+
+      // Save checks per date+session
+      const dateISO = elDate.value || isoToday();
+      const key = `ml_checks_${dateISO}_${elSession.value}`;
+      const checks = [...document.querySelectorAll('#tasks input[type=checkbox]')].map(c=>c.checked);
+      localStorage.setItem(key, JSON.stringify(checks));
+    }
+
+    function loadState(){
+      const raw = localStorage.getItem('ml_planner_state');
+      if(!raw){
+        // Defaults
+        const d=new Date(); d.setDate(d.getDate()-d.getDay());
+        elStart.value = iso(d);
+        elDate.value = isoToday();
+        elSession.value = 'Morning';
+        return;
+      }
+      try{
+        const s = JSON.parse(raw);
+        elStart.value = s.start || (()=>{const d=new Date(); d.setDate(d.getDate()-d.getDay()); return iso(d);})();
+        elDate.value = s.date || isoToday();
+        elSession.value = s.session || 'Morning';
+      }catch{
+        const d=new Date(); d.setDate(d.getDate()-d.getDay());
+        elStart.value = iso(d);
+        elDate.value = isoToday();
+        elSession.value = 'Morning';
+      }
+    }
+
+    // ---------- Events ----------
+    document.getElementById('resetBtn').addEventListener('click',()=>{
+      document.querySelectorAll('#tasks input[type=checkbox]').forEach(c=>c.checked=false);
+      updateProgress(); saveState();
+    });
+
+    document.getElementById('copyBtn').addEventListener('click',()=>{
+      const day = document.getElementById('todayLine').textContent;
+      const txt = `${day}\n` + [...document.querySelectorAll('#tasks label')].map(l=>'- '+l.innerText.trim()).join('\n');
+      navigator.clipboard.writeText(txt);
+    });
+
+    document.getElementById('printBtn').addEventListener('click',()=>window.print());
+
+    ['change','input'].forEach(ev=>{
+      [elStart,elDate,elSession].forEach(el=> el.addEventListener(ev,render));
+    });
+
+    document.addEventListener('change', e=>{
+      if(e.target.matches('#tasks input[type=checkbox]')){ updateProgress(); saveState(); }
+    });
+
+    // ---------- Init ----------
+    loadState();
+    render();
   </script>
 </body>
 </html>
