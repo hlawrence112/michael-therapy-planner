@@ -2,44 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Michael – Therapy Planner</title>
-  
-  <!-- App theme + iOS install hints -->
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Michael – Therapy & Tennis Planner</title>
+
+  <!-- App install (PWA) -->
   <meta name="theme-color" content="#0ea5e9" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <!-- If you add icon-512.png to the repo root, iOS will use it on Home Screen installs -->
   <link rel="apple-touch-icon" href="icon-512.png" />
 
   <style>
     :root{
-      --bg:#0b1220; --card:#121a2b; --muted:#8aa0c7; --text:#e9efff; --acc:#60a5fa; --ok:#22c55e; --warn:#fbbf24;
+      --bg:#0b1220; --card:#121a2b; --muted:#8aa0c7; --text:#e9efff;
+      --acc:#60a5fa; --ok:#22c55e; --warn:#fbbf24; --line:#1f2a44;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:linear-gradient(180deg,#0b1220,#0a0f1a 60%);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial}
+    body{margin:0;background:linear-gradient(180deg,#0b1220,#0a0f1a 60%);color:var(--text);
+         font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial}
     .wrap{max-width:1000px;margin:32px auto;padding:0 16px}
     header{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between}
     h1{margin:0;font-size:28px}
     .sub{color:var(--muted);font-size:14px;margin-top:4px}
-    .card{background:radial-gradient(1200px 600px at -10% -20%,#1b2947 0%,transparent 50%), var(--card);border:1px solid #1f2a44;border-radius:16px;padding:16px}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--line);
+           background:#0e1627;font-size:12px;color:#bcd0ff;margin-right:6px}
+    .row{display:flex;flex-wrap:wrap;gap:12px}
     label{display:grid;gap:6px;font-size:12px;color:var(--muted)}
     input,select,button{border:1px solid #29406b;background:#0e1627;color:var(--text);border-radius:10px;padding:10px 12px}
     input[type="date"]{padding:8px 10px}
     button{background:linear-gradient(180deg,#1e3a8a,#1e40af);border:1px solid #1d4ed8;cursor:pointer}
     button.secondary{background:#0e1627;border-color:#29406b}
-    button:disabled{opacity:.6;cursor:not-allowed}
-    .row{display:flex;flex-wrap:wrap;gap:12px}
-    .grid{display:grid;gap:8px}
-    .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #27406e;background:#0e1627;font-size:12px;color:#bcd0ff}
-    .list{display:grid;gap:8px;margin:0;padding-left:18px}
-    .check{display:flex;gap:10px;align-items:flex-start}
-    .check input{margin-top:2px}
+    .card{background:radial-gradient(1200px 600px at -10% -20%,#1b2947 0%,transparent 50%), var(--card);
+          border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:16px}
     .bar{height:8px;background:#0e1627;border:1px solid #29406b;border-radius:999px;overflow:hidden}
     .bar>i{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#86efac);width:0%}
     .fine{font-size:12px;color:var(--muted)}
-    .footer{margin-top:24px;display:flex;gap:8px;flex-wrap:wrap}
-    .note{border-left:3px solid #27406e;padding-left:10px;color:var(--muted)}
+    ol{margin:12px 0;padding-left:18px;display:grid;gap:8px}
+    .check{display:flex;gap:10px;align-items:flex-start}
+    .note{border-left:3px solid #27406e;padding-left:10px;color:var(--muted);margin:.5rem 0}
+    .footer{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
   </style>
 </head>
 <body>
@@ -48,32 +48,24 @@
       <div>
         <h1>Michael – Therapy & Tennis Planner</h1>
         <div class="sub" id="phaseLine">Week ? • Phase ?</div>
-        <div class="sub">Scoliosis cues: <span class="badge">Thoracic → lean RIGHT (opens LEFT)</span> <span class="badge">Lumbar → lean LEFT (opens RIGHT)</span></div>
+        <div class="sub">
+          <span class="badge">Thoracic → lean RIGHT (opens LEFT)</span>
+          <span class="badge">Lumbar → lean LEFT (opens RIGHT)</span>
+        </div>
       </div>
       <div class="row">
-        <label>
-          <span>Program Start</span>
-          <input type="date" id="start" />
-        </label>
-        <label>
-          <span>Date</span>
-          <input type="date" id="date" />
-        </label>
-        <label>
-          <span>Session</span>
-          <select id="session">
-            <option>Morning</option>
-            <option>Afternoon</option>
-            <option>Evening</option>
-          </select>
+        <label><span>Program Start</span><input type="date" id="start" /></label>
+        <label><span>Date</span><input type="date" id="date" /></label>
+        <label><span>Session</span>
+          <select id="session"><option>Morning</option><option>Afternoon</option><option>Evening</option></select>
         </label>
       </div>
     </header>
 
-    <section class="card" style="margin-top:16px">
+    <section class="card">
       <div class="row" style="justify-content:space-between;align-items:center">
-        <div class="grid">
-          <div><span class="badge" id="todayLine"></span></div>
+        <div>
+          <div class="badge" id="todayLine">—</div>
           <div class="sub" id="phaseName"></div>
         </div>
         <div class="row">
@@ -84,7 +76,7 @@
       </div>
       <div class="bar" style="margin:12px 0 6px"><i id="prog"></i></div>
       <div class="fine" id="progressText">0% complete</div>
-      <ol class="list" id="items"></ol>
+      <ol id="items"></ol>
       <div class="footer">
         <span class="badge">Serve cap: 15–20 (quality over volume)</span>
         <span class="badge">Stop if pain &gt; 3/10</span>
@@ -92,12 +84,14 @@
       </div>
     </section>
 
-    $1
+    <section class="card">
+      <h3 style="margin:0 0 8px">Notes</h3>
+      <p class="note">Saves settings locally (no account needed). Morning 10:30 • Afternoon 3:00 • Evening 8:00.</p>
       <p class="note" id="motivation"></p>
     </section>
   </div>
 
-  <!-- Inline manifest: we create it on-the-fly so you do NOT need a separate manifest file -->
+  <!-- Inline manifest so no extra file is required -->
   <script id="inline-manifest" type="application/json">
   {
     "name": "Michael – Therapy Planner",
@@ -113,20 +107,17 @@
   </script>
 
   <script>
-  // Attach inline manifest as a blob (so no separate file is required)
-  (function attachManifest(){
+  // Attach manifest from inline JSON
+  (function(){
     try{
       const json = document.getElementById('inline-manifest').textContent.trim();
       const blob = new Blob([json], {type:'application/manifest+json'});
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('link');
-      link.rel = 'manifest';
-      link.href = url;
-      document.head.appendChild(link);
-    }catch(e){ /* ignore */ }
+      const link = document.createElement('link'); link.rel='manifest'; link.href=url; document.head.appendChild(link);
+    }catch(e){}
   })();
 
-  // ---------- Motivation Quotes ----------
+  // ---------- Motivation ----------
   const QUOTES = [
     "Every rep is a step toward balance — today’s effort makes tomorrow easier.",
     "Stronger shoulders, steadier spine. You’re building the foundation for your tennis.",
@@ -140,125 +131,108 @@
     "Show up, check the boxes, keep moving forward."
   ];
   function pickQuote(dateISO, session, week){
-    const sessionIdx = {Morning:0,Afternoon:1,Evening:2}[session] ?? 0;
+    const sIdx = {Morning:0,Afternoon:1,Evening:2}[session] ?? 0;
     const dayIdx = new Date(dateISO+"T00:00:00").getDay();
-    const seed = week*13 + dayIdx*3 + sessionIdx;
+    const seed = week*13 + dayIdx*3 + sIdx;
     return QUOTES[ seed % QUOTES.length ];
   }
 
-  $1
-  const DEFAULT_START = "2025-09-08"; // Monday (Week 1)
+  // ---------- Helpers ----------
+  const DEFAULT_START = "2025-09-08"; // Monday
   const isoToday = () => new Date().toISOString().slice(0,10);
-  const weekday = (iso) => ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date(iso+"T00:00:00").getDay()];
-  const diffWeeks = (startISO, currentISO) => {
-    const a = new Date(startISO+"T00:00:00");
-    const b = new Date(currentISO+"T00:00:00");
-    const d = Math.floor((b-a)/(1000*60*60*24*7));
-    return d+1; // 1-based
+  const weekday = iso => ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date(iso+"T00:00:00").getDay()];
+  const diffWeeks = (aISO,bISO)=>{
+    const a=new Date(aISO+"T00:00:00"), b=new Date(bISO+"T00:00:00");
+    return Math.floor((b-a)/(1000*60*60*24*7))+1; // 1-based
   };
   function phaseForWeek(w){
-    if (w<=4) return {id:1,name:"Phase 1 – Reset & Pain Control"};
-    if (w<=10) return {id:2,name:"Phase 2 – Mobility & Stability"};
-    if (w<=18) return {id:3,name:"Phase 3 – Strength & Asymmetry"};
+    if(w<=4) return {id:1,name:"Phase 1 – Reset & Pain Control"};
+    if(w<=10) return {id:2,name:"Phase 2 – Mobility & Stability"};
+    if(w<=18) return {id:3,name:"Phase 3 – Strength & Asymmetry"};
     return {id:4,name:"Phase 4 – Power & Integration"};
   }
-  function save(key,val){localStorage.setItem(key,JSON.stringify(val));}
-  function load(key,def){try{const v=JSON.parse(localStorage.getItem(key));return (v===null||v===undefined)?def:v;}catch{return def;}}
+  const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+  const load=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d;}catch{return d;}};
 
-  // ---------- Program Content (Adjusted) ----------
-  // Includes med‑ball volume reduction, RIGHT suitcase carry shorter, FlexBar, scoliosis leans, complementary work.
+  // ---------- Program (with med-ball cap, FlexBar, leans, KB suitcase carry tweak) ----------
   const PLAN = {
-    Monday:{
-      Morning:[
+    Monday:{ Morning:[
         "Serratus wall slides 2×12",
         "Prone Y/T/W 2×8 each",
         "Pallof press holds 3×20s",
-        "Med Ball Slams 1–2×4 (two‑handed, light, equal drive)",
-        "Glute Bridge 2×8 (focus on RIGHT, 2s hold)"
+        "Med-ball slams 1–2×4 (two-handed, light, equal drive)",
+        "Glute bridge 2×8 (focus RIGHT, 2s hold)"
       ],
       Afternoon:[
         "Warm-up (roller, serratus punches, band ER, side plank reach-through, 5 shadow serves)",
         "Rally rhythm; controlled pace",
-        "Rotational Wall Throws 2×6/side (non-dominant first)",
+        "Rotational wall throws 2×6/side (non-dominant first)",
         "Serve cap: 15–20 (smooth rhythm)"
       ],
       Evening:[
-        "Infrared heating pad 10–15 min; Optional TENS 10–15 min",
-        "Concave-side opens: Thoracic → lean RIGHT; Lumbar → lean LEFT (2×20–30s each)",
+        "Infrared heat 10–15 min; Optional TENS 10–15 min",
+        "Concave opens: Thoracic → lean RIGHT; Lumbar → lean LEFT (2×20–30s each)",
         "90/90 hip lift with reach — 5 breaths × 2–3 sets",
         "FlexBar: Tyler Twist 2×10; Reverse Twist 2×10; Chest Press Iso 3×15–20s; Overhead Bend 2×8–10"
-      ]
-    },
-    Tuesday:{
-      Morning:[
+      ]},
+    Tuesday:{ Morning:[
         "Serratus wall slides 3×10; Prone Y/T/W 2×8",
         "Pallof press 3×10/side (2s hold)",
-        "Suitcase Carry (25 lb KB): LEFT 3×30s; RIGHT 2×15s (strict posture)",
-        "Med Ball Slams 1–2×4 (two‑handed, light)",
-        "Glute Bridge 2×8 (focus on RIGHT)"
+        "Suitcase carry (25 lb KB): LEFT 3×30s; RIGHT 2×15s (strict posture)",
+        "Med-ball slams 1–2×4 (two-handed, light)",
+        "Glute bridge 2×8 (focus RIGHT)"
       ],
       Afternoon:[
         "Controlled rally drills",
-        "Rotational Wall Throws 2×6/side (light)",
+        "Rotational wall throws 2×6/side (light)",
         "Serve cap 10–12 (no heavy session)"
       ],
-      Evening:["Recovery as Monday"]
-    },
-    Wednesday:{
-      Morning:[
+      Evening:["Recovery as Monday"]},
+    Wednesday:{ Morning:[
         "Foam roller thoracic 2×10; Open-book 2×8/side",
         "90/90 hip lift with reach — 5 breaths × 3 sets",
         "Child’s pose with side reach (RIGHT then LEFT)",
-        "Optional: Med Ball Slams 1×4 only if fully pain-free"
+        "Optional: Med-ball slams 1×4 only if fully pain-free"
       ],
       Afternoon:["Recovery cardio 20–30 min — No tennis"],
-      Evening:["Recovery as Monday"]
-    },
-    Thursday:{
-      Morning:[
+      Evening:["Recovery as Monday"]},
+    Thursday:{ Morning:[
         "Band pull-aparts 2×12; Cat–cow 1×8",
         "Pallof press 3×10/side (2s hold)",
-        "Suitcase Carry (25 lb KB): LEFT 3×30s; RIGHT 2×15s",
-        "Med Ball Slams 1–2×4 (two‑handed, light)",
-        "Glute Bridge 2×8 (focus on RIGHT)"
+        "Suitcase carry (25 lb KB): LEFT 3×30s; RIGHT 2×15s",
+        "Med-ball slams 1–2×4 (two-handed, light)",
+        "Glute bridge 2×8 (focus RIGHT)"
       ],
       Afternoon:[
         "On-court: shadow serves with band 2×10",
-        "Rotational Wall Throws 2×6/side (light)"
+        "Rotational wall throws 2×6/side (light)"
       ],
-      Evening:["Recovery as Monday"]
-    },
-    Friday:{
-      Morning:[
+      Evening:["Recovery as Monday"]},
+    Friday:{ Morning:[
         "Serratus wall slides 2×12; Band ER 2×12",
         "Side plank reach-through 2×20s/side",
-        "Med Ball Slams 1–2×4 (light, two‑handed)",
-        "Glute Bridge 2×8 (focus on RIGHT)"
+        "Med-ball slams 1–2×4 (light, two-handed)",
+        "Glute bridge 2×8 (focus RIGHT)"
       ],
       Afternoon:[
         "Tennis session; Serve cap 15–20 (form focus)",
         "Lateral shuffle + resisted rotation 3×10",
-        "Rotational Wall Throws 2×6/side (light)"
+        "Rotational wall throws 2×6/side (light)"
       ],
-      Evening:["Recovery as Monday"]
-    },
-    Saturday:{
-      Morning:[
-        "Med Ball Slams 2×4 (cap volume)",
+      Evening:["Recovery as Monday"]},
+    Saturday:{ Morning:[
+        "Med-ball slams 2×4 (cap volume)",
         "Rotational throws 2×6/side (only if pain-free)",
-        "Single‑arm landmine press 3×8/side (RIGHT stays lighter)"
+        "Single-arm landmine press 3×8/side (RIGHT stays lighter)"
       ],
-      Afternoon:["On‑court: shadow serves; half‑speed serves; posture focus"],
-      Evening:["Recovery as Monday"]
-    },
-    Sunday:{
-      Morning:["Active recovery: walk/swim/mobility only"],
+      Afternoon:["Shadow serves; half-speed serves; posture focus"],
+      Evening:["Recovery as Monday"]},
+    Sunday:{ Morning:["Active recovery: walk/swim/mobility only"],
       Afternoon:["OFF – no tennis"],
-      Evening:["Light stretching, hydration, prep next week"]
-    }
+      Evening:["Light stretching, hydration, prep next week"]}
   };
 
-  // ---------- State + Rendering ----------
+  // ---------- State & Render ----------
   const elStart = document.getElementById('start');
   const elDate = document.getElementById('date');
   const elSession = document.getElementById('session');
@@ -271,46 +245,51 @@
 
   function init(){
     elStart.value = load('mlp_start', DEFAULT_START);
-    elDate.value = load('mlp_date', isoToday());
+    elDate.value  = load('mlp_date', isoToday());
     elSession.value = load('mlp_session', 'Morning');
     render();
   }
 
-  $1
-    // Set motivational line
+  function render(){
+    const startISO = elStart.value || DEFAULT_START;
+    const dateISO  = elDate.value  || isoToday();
+    const day = weekday(dateISO);
+    const week = diffWeeks(startISO, dateISO);
+    const phase = phaseForWeek(week);
+
+    document.title = `Michael – ${day} ${elSession.value}`;
+    elPhaseLine.textContent = `Week ${week} • ${phase.name}`;
+    elPhaseName.textContent = `Today: ${day} • Session: ${elSession.value}`;
+    elToday.textContent = new Date(dateISO+"T00:00:00").toDateString();
+
+    // Motivation
     const mot = document.getElementById('motivation');
-    if (mot) mot.textContent = pickQuote(dateISO, elSession.value, w);
+    if (mot) mot.textContent = pickQuote(dateISO, elSession.value, week);
 
-    const plan = PLAN[day] || {};
-    const tasks = plan[elSession.value] || ["No items defined for this session."];
+    const tasks = (PLAN[day]||{})[elSession.value] || ["No items defined for this session."];
 
-    // checkboxes state per-date-session
-    const dkey = `done_${dateISO}_${elSession.value}`;
-    let done = load(dkey, Array(tasks.length).fill(false));
-    if(done.length !== tasks.length) done = Array(tasks.length).fill(false);
+    // checkbox state per date+session
+    const key = `done_${dateISO}_${elSession.value}`;
+    let done = load(key, Array(tasks.length).fill(false));
+    if (done.length !== tasks.length) done = Array(tasks.length).fill(false);
 
-    elItems.innerHTML = '';
+    elItems.innerHTML = "";
     tasks.forEach((t,i)=>{
       const li = document.createElement('li');
       li.className = 'check';
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.checked = !!done[i];
-      cb.addEventListener('change', ()=>{
-        done[i] = cb.checked; save(dkey, done); updateProgress();
-      });
-      const p = document.createElement('div');
-      p.innerHTML = t;
-      li.append(cb,p); elItems.append(li);
+      const cb = document.createElement('input'); cb.type='checkbox'; cb.checked=!!done[i];
+      cb.addEventListener('change', ()=>{ done[i]=cb.checked; save(key,done); updateProgress(); });
+      const txt = document.createElement('div'); txt.textContent = t;
+      li.append(cb, txt); elItems.append(li);
     });
 
     function updateProgress(){
-      const pct = Math.round( (done.filter(Boolean).length / tasks.length) * 100 ) || 0;
-      elProg.style.width = pct+"%"; elProgText.textContent = pct+"% complete";
+      const pct = Math.round((done.filter(Boolean).length / tasks.length) * 100) || 0;
+      elProg.style.width = pct + "%";
+      elProgText.textContent = pct + "% complete";
     }
     updateProgress();
 
-    // Save state selections
     save('mlp_start', startISO); save('mlp_date', dateISO); save('mlp_session', elSession.value);
   }
 
@@ -318,20 +297,21 @@
   elDate.addEventListener('change', render);
   elSession.addEventListener('change', render);
 
-  // Copy / Print / Reset
+  // Actions
   document.getElementById('copy').addEventListener('click', async ()=>{
     const dateISO = elDate.value || isoToday();
     const day = weekday(dateISO);
-    const w = diffWeeks(elStart.value||DEFAULT_START, dateISO);
-    const phase = phaseForWeek(w);
+    const week = diffWeeks(elStart.value||DEFAULT_START, dateISO);
+    const phase = phaseForWeek(week);
     const tasks = (PLAN[day]||{})[elSession.value]||[];
-    const dkey = `done_${dateISO}_${elSession.value}`;
-    const done = load(dkey, Array(tasks.length).fill(false));
-    const lines = [`Michael – ${day} ${elSession.value} (Week ${w}, ${phase.name})`].concat(
-      tasks.map((t,i)=> `${done[i]?"[x]":"[ ]"} ${t}`)
-    ).join('\n');
-    try{ await navigator.clipboard.writeText(lines); alert('Copied to clipboard.'); }
-    catch(e){ const ta=document.createElement('textarea'); ta.value=lines; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); alert('Copied (fallback).'); }
+    const key = `done_${dateISO}_${elSession.value}`;
+    const done = load(key, Array(tasks.length).fill(false));
+    const lines = [`Michael – ${day} ${elSession.value} (Week ${week}, ${phase.name})`]
+      .concat(tasks.map((t,i)=> `${done[i]?"[x]":"[ ]"} ${t}`)).join("\n");
+    try{ await navigator.clipboard.writeText(lines); alert("Copied to clipboard."); }
+    catch(e){ const ta=document.createElement('textarea'); ta.value=lines;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+      alert("Copied (fallback)."); }
   });
   document.getElementById('print').addEventListener('click', ()=>window.print());
   document.getElementById('reset').addEventListener('click', ()=>{
