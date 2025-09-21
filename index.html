@@ -15,7 +15,7 @@
     .sub{color:var(--muted);font-size:13px;margin-top:4px}
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
     .card{background:radial-gradient(1200px 600px at -10% -20%,#1b2947 0%,transparent 50%),var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
-    .row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:end}
     label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
     input,select,button{background:#0e1729;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
     button{cursor:pointer}
@@ -33,6 +33,14 @@
     .video-wrap{position:relative;width:100%;aspect-ratio:16/9;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#000}
     .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
     .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .inline{display:flex;align-items:center;gap:10px}
+    .lock{display:flex;align-items:center;gap:6px;color:#cfe3ff;font-size:12px;margin-top:22px}
+    .menu{position:relative}
+    .menu button{padding:8px 10px}
+    .menu-panel{position:absolute;right:0;top:40px;background:#0e1729;border:1px solid var(--line);border-radius:10px;display:none;min-width:200px;z-index:10}
+    .menu-panel a{display:block;padding:10px 12px;color:#e9f1ff;text-decoration:none;border-bottom:1px solid #1b2a44}
+    .menu-panel a:last-child{border-bottom:none}
+    .menu-panel a:hover{background:#14203a}
     @media (max-width:900px){.row{grid-template-columns:1fr} .grid-2{grid-template-columns:1fr}}
   </style>
 </head>
@@ -49,7 +57,10 @@
     <section class="card">
       <div class="row">
         <label>Program Start
-          <input type="date" id="start" />
+          <div class="inline">
+            <input type="date" id="start" />
+            <div class="lock"><input type="checkbox" id="lockStart" /> <label for="lockStart">🔒 Lock start date</label></div>
+          </div>
         </label>
         <label>Date
           <input type="date" id="date" />
@@ -67,7 +78,13 @@
           <div class="progress"><div class="bar" id="bar"></div></div>
           <small id="pct" class="muted">0% complete</small>
         </div>
-        <div style="text-align:right">
+        <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
+          <div class="menu">
+            <button id="menuBtn">⋯</button>
+            <div id="menuPanel" class="menu-panel">
+              <a href="#" id="resetAll">Reset saved start date & lock</a>
+            </div>
+          </div>
           <button id="copyBtn">Copy session</button>
           <button id="printBtn">Print / Save PDF</button>
           <button id="resetBtn">Reset checkboxes</button>
@@ -107,6 +124,9 @@
   </div>
 
   <script>
+    // ---------- Config ----------
+    const PROGRAM_START_DEFAULT = "2025-09-08"; // fixed default
+
     // ---------- Program Data ----------
     const PROGRAM = {
       phases:[
@@ -154,6 +174,7 @@
 
     // ---------- Element Refs ----------
     const elStart = document.getElementById('start');
+    const elLock = document.getElementById('lockStart');
     const elDate = document.getElementById('date');
     const elSession = document.getElementById('session');
     const elTasks = document.getElementById('tasks');
@@ -163,6 +184,9 @@
     const elMotivation = document.getElementById('motivation');
     const elBar = document.getElementById('bar');
     const elPct = document.getElementById('pct');
+    const elMenuBtn = document.getElementById('menuBtn');
+    const elMenuPanel = document.getElementById('menuPanel');
+    const elResetAll = document.getElementById('resetAll');
 
     // ---------- Helpers ----------
     const iso = d=> new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
@@ -174,9 +198,48 @@
       return PROGRAM.phases[PROGRAM.phases.length-1];
     }
 
-    // ---------- Render ----------
+    function loadState(){
+      // Prefer locked start date if saved
+      const savedLockedStart = localStorage.getItem('ml_start_date');
+      const state = JSON.parse(localStorage.getItem('ml_planner_state')||'{}');
+
+      if(savedLockedStart){
+        elStart.value = savedLockedStart;
+        elLock.checked = true;
+        elStart.disabled = true;
+      } else {
+        elStart.value = state.start || PROGRAM_START_DEFAULT;
+        elLock.checked = !!state.startLocked;
+        elStart.disabled = !!state.startLocked;
+      }
+
+      elDate.value = state.date || isoToday();
+      elSession.value = state.session || 'Morning';
+    }
+
+    function saveState(){
+      const state = {
+        start: elStart.value,
+        date: elDate.value,
+        session: elSession.value,
+        startLocked: elLock.checked
+      };
+      localStorage.setItem('ml_planner_state', JSON.stringify(state));
+
+      // Persist lock-specific start date separately
+      if(elLock.checked && elStart.value){
+        localStorage.setItem('ml_start_date', elStart.value);
+      }
+
+      // Save checks per date+session
+      const dateISO = elDate.value || isoToday();
+      const key = `ml_checks_${dateISO}_${elSession.value}`;
+      const checks = [...document.querySelectorAll('#tasks input[type=checkbox]')].map(c=>c.checked);
+      localStorage.setItem(key, JSON.stringify(checks));
+    }
+
     function render(){
-      const startISO = elStart.value || (()=>{const d=new Date(); d.setDate(d.getDate()-d.getDay()); return iso(d);})();
+      const startISO = elStart.value || PROGRAM_START_DEFAULT;
       const dateISO = elDate.value || isoToday();
       const day = weekday(dateISO);
       const w = diffWeeks(startISO, dateISO);
@@ -187,7 +250,7 @@
       elPhaseName.textContent = `${phase.name}`;
       elToday.textContent = `${day} – ${dateISO}`;
 
-      // Motivation (rotate each load)
+      // Motivation
       elMotivation.textContent = QUOTES[Math.floor(Math.random()*QUOTES.length)];
 
       // Build tasks
@@ -217,45 +280,6 @@
       elPct.textContent = `${pct}% complete`;
     }
 
-    // ---------- State ----------
-    function saveState(){
-      const state = {
-        start: elStart.value,
-        date: elDate.value,
-        session: elSession.value
-      };
-      localStorage.setItem('ml_planner_state', JSON.stringify(state));
-
-      // Save checks per date+session
-      const dateISO = elDate.value || isoToday();
-      const key = `ml_checks_${dateISO}_${elSession.value}`;
-      const checks = [...document.querySelectorAll('#tasks input[type=checkbox]')].map(c=>c.checked);
-      localStorage.setItem(key, JSON.stringify(checks));
-    }
-
-    function loadState(){
-      const raw = localStorage.getItem('ml_planner_state');
-      if(!raw){
-        // Defaults
-        const d=new Date(); d.setDate(d.getDate()-d.getDay());
-        elStart.value = iso(d);
-        elDate.value = isoToday();
-        elSession.value = 'Morning';
-        return;
-      }
-      try{
-        const s = JSON.parse(raw);
-        elStart.value = s.start || (()=>{const d=new Date(); d.setDate(d.getDate()-d.getDay()); return iso(d);})();
-        elDate.value = s.date || isoToday();
-        elSession.value = s.session || 'Morning';
-      }catch{
-        const d=new Date(); d.setDate(d.getDate()-d.getDay());
-        elStart.value = iso(d);
-        elDate.value = isoToday();
-        elSession.value = 'Morning';
-      }
-    }
-
     // ---------- Events ----------
     document.getElementById('resetBtn').addEventListener('click',()=>{
       document.querySelectorAll('#tasks input[type=checkbox]').forEach(c=>c.checked=false);
@@ -271,7 +295,38 @@
     document.getElementById('printBtn').addEventListener('click',()=>window.print());
 
     ['change','input'].forEach(ev=>{
-      [elStart,elDate,elSession].forEach(el=> el.addEventListener(ev,render));
+      [elStart,elDate,elSession,document.getElementById('lockStart')].forEach(el=> el.addEventListener(ev,()=>{
+        if(el === elLock){
+          if(elLock.checked){
+            if(!elStart.value) elStart.value = PROGRAM_START_DEFAULT;
+            elStart.disabled = true;
+            localStorage.setItem('ml_start_date', elStart.value);
+          } else {
+            elStart.disabled = false;
+            localStorage.removeItem('ml_start_date');
+          }
+        }
+        render();
+      }));
+    });
+
+    // Menu toggle & reset
+    document.getElementById('menuBtn').addEventListener('click',()=>{
+      elMenuPanel.style.display = elMenuPanel.style.display==='block' ? 'none' : 'block';
+    });
+    document.addEventListener('click', (e)=>{
+      if(!e.target.closest('.menu')) elMenuPanel.style.display='none';
+    });
+    elResetAll.addEventListener('click',(e)=>{
+      e.preventDefault();
+      localStorage.removeItem('ml_start_date');
+      const raw = JSON.parse(localStorage.getItem('ml_planner_state')||'{}');
+      delete raw.start; delete raw.startLocked;
+      localStorage.setItem('ml_planner_state', JSON.stringify(raw));
+      elLock.checked = false;
+      elStart.disabled = false;
+      elStart.value = PROGRAM_START_DEFAULT;
+      render();
     });
 
     document.addEventListener('change', e=>{
