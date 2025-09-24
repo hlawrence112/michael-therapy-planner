@@ -35,12 +35,8 @@
     .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .inline{display:flex;align-items:center;gap:10px}
     .lock{display:flex;align-items:center;gap:6px;color:#cfe3ff;font-size:12px;margin-top:22px}
-    .menu{position:relative}
-    .menu button{padding:8px 10px}
-    .menu-panel{position:absolute;right:0;top:40px;background:#0e1729;border:1px solid var(--line);border-radius:10px;display:none;min-width:200px;z-index:10}
-    .menu-panel a{display:block;padding:10px 12px;color:#e9f1ff;text-decoration:none;border-bottom:1px solid #1b2a44}
-    .menu-panel a:last-child{border-bottom:none}
-    .menu-panel a:hover{background:#14203a}
+    .rest{background:#11202c;border-color:#1c3945}
+    .rest .pill{border-color:#1c3945}
     @media (max-width:900px){.row{grid-template-columns:1fr} .grid-2{grid-template-columns:1fr}}
   </style>
 </head>
@@ -79,12 +75,6 @@
           <small id="pct" class="muted">0% complete</small>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
-          <div class="menu">
-            <button id="menuBtn">⋯</button>
-            <div id="menuPanel" class="menu-panel">
-              <a href="#" id="resetAll">Reset saved start date & lock</a>
-            </div>
-          </div>
           <button id="copyBtn">Copy session</button>
           <button id="printBtn">Print / Save PDF</button>
           <button id="resetBtn">Reset checkboxes</button>
@@ -94,15 +84,17 @@
         <span class="pill">Serve cap: 15–20 (quality over volume)</span>
         <span class="pill">Stop if pain &gt; 3/10</span>
         <span class="pill">Heat → (Optional) TENS → Stretch</span>
+        <span class="pill">Every <b>Sunday</b> = Rest Day (zero activity)</span>
       </div>
     </section>
 
-    <section class="card">
+    <section class="card" id="todayCard">
       <div class="section-title">
         <div class="h3" id="todayLine">Today</div>
         <small id="phaseName">Phase</small>
       </div>
       <div class="tasks" id="tasks"></div>
+      <div class="note" id="restNote" style="display:none">Today is a scheduled <b>Rest Day – Zero Activity</b>. No therapy, no tennis. Optional comfort only (heat/TENS).</div>
     </section>
 
     <section class="card">
@@ -130,10 +122,10 @@
     // ---------- Program Data ----------
     const PROGRAM = {
       phases:[
-        {name:"Phase 1 – Reset & Pain Control", weeks:[1,2], goals:["Calm pain/irritability","Restore scapular rhythm","Thoracic/Lumbar directional breathing"]},
-        {name:"Phase 2 – Mobility & Stability", weeks:[3,4], goals:["Improve T-spine mobility","Serratus + lower trap control","Hip/QL balance"]},
-        {name:"Phase 3 – Strength & Asymmetry", weeks:[5,6], goals:["Unilateral strength bias to L","Rotator cuff endurance","Kettlebell carries & hip control"]},
-        {name:"Phase 4 – Power & Integration", weeks:[7,8], goals:["Serve power return","Med-ball & elastic speed","Full tennis integration"]}
+        {name:"Phase 1 – Reset & Pain Control", weeks:[1,2]},
+        {name:"Phase 2 – Mobility & Stability", weeks:[3,4]},
+        {name:"Phase 3 – Strength & Asymmetry", weeks:[5,6]},
+        {name:"Phase 4 – Power & Integration", weeks:[7,8]}
       ],
       sessions:{
         Morning:[
@@ -184,14 +176,14 @@
     const elMotivation = document.getElementById('motivation');
     const elBar = document.getElementById('bar');
     const elPct = document.getElementById('pct');
-    const elMenuBtn = document.getElementById('menuBtn');
-    const elMenuPanel = document.getElementById('menuPanel');
-    const elResetAll = document.getElementById('resetAll');
+    const elTodayCard = document.getElementById('todayCard');
+    const elRestNote = document.getElementById('restNote');
 
     // ---------- Helpers ----------
     const iso = d=> new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
     const isoToday = ()=> iso(new Date());
     const weekday = d=> new Date(d+"T00:00:00").toLocaleDateString(undefined,{weekday:'long'});
+    const jsDate = d=> new Date(d+"T00:00:00");
     const diffWeeks = (start,day)=> Math.max(1, Math.floor((new Date(day)-new Date(start))/(7*864e5))+1);
     function phaseForWeek(w){
       for(const p of PROGRAM.phases){ if(w>=p.weeks[0] && w<=p.weeks[1]) return p; }
@@ -199,37 +191,25 @@
     }
 
     function loadState(){
-      // Prefer locked start date if saved
-      const savedLockedStart = localStorage.getItem('ml_start_date');
       const state = JSON.parse(localStorage.getItem('ml_planner_state')||'{}');
 
-      if(savedLockedStart){
-        elStart.value = savedLockedStart;
-        elLock.checked = true;
-        elStart.disabled = true;
-      } else {
-        elStart.value = state.start || PROGRAM_START_DEFAULT;
-        elLock.checked = !!state.startLocked;
-        elStart.disabled = !!state.startLocked;
-      }
+      // Start date persists (or default), lock persists
+      elStart.value = state.start || PROGRAM_START_DEFAULT;
+      elLock.checked = !!state.startLocked;
+      elStart.disabled = !!state.startLocked;
 
-      elDate.value = state.date || isoToday();
+      // Always default to TODAY on load
+      elDate.value = isoToday();
       elSession.value = state.session || 'Morning';
     }
 
     function saveState(){
       const state = {
         start: elStart.value,
-        date: elDate.value,
         session: elSession.value,
         startLocked: elLock.checked
       };
       localStorage.setItem('ml_planner_state', JSON.stringify(state));
-
-      // Persist lock-specific start date separately
-      if(elLock.checked && elStart.value){
-        localStorage.setItem('ml_start_date', elStart.value);
-      }
 
       // Save checks per date+session
       const dateISO = elDate.value || isoToday();
@@ -244,29 +224,37 @@
       const day = weekday(dateISO);
       const w = diffWeeks(startISO, dateISO);
       const phase = phaseForWeek(w);
+      const isSunday = jsDate(dateISO).getDay() === 0; // 0 = Sunday
 
       document.title = `Michael – ${day} ${elSession.value}`;
-      elPhaseLine.textContent = `Week ${w} • ${phase.name}`;
-      elPhaseName.textContent = `${phase.name}`;
+      elPhaseLine.textContent = `Week ${w} • ${isSunday ? 'Rest Day' : phase.name}`;
+      elPhaseName.textContent = `${isSunday ? 'Rest Day' : phase.name}`;
       elToday.textContent = `${day} – ${dateISO}`;
 
       // Motivation
       elMotivation.textContent = QUOTES[Math.floor(Math.random()*QUOTES.length)];
 
-      // Build tasks
-      const items = PROGRAM.sessions[elSession.value] || [];
+      // Build tasks (or Rest Day)
       elTasks.innerHTML = '';
-      items.forEach((it,i)=>{
-        const id = `t_${elSession.value}_${i}`.replace(/\s+/g,'_');
-        const row = document.createElement('div'); row.className='task';
-        row.innerHTML = `<input type="checkbox" id="${id}"><label for="${id}"><b>${it.t}</b>${it.r?`<div class='muted'>${it.r}</div>`:''}</label>`;
-        elTasks.appendChild(row);
-      });
-
-      // Restore checkbox state (per day+session)
-      const key = `ml_checks_${dateISO}_${elSession.value}`;
-      const saved = JSON.parse(localStorage.getItem(key)||'[]');
-      [...elTasks.querySelectorAll('input[type=checkbox]')].forEach((c,i)=> c.checked = !!saved[i]);
+      if(isSunday){
+        elTodayCard.classList.add('rest');
+        elRestNote.style.display = 'block';
+        // no tasks on rest day
+      } else {
+        elTodayCard.classList.remove('rest');
+        elRestNote.style.display = 'none';
+        const items = PROGRAM.sessions[elSession.value] || [];
+        items.forEach((it,i)=>{
+          const id = `t_${elSession.value}_${i}`.replace(/\s+/g,'_');
+          const row = document.createElement('div'); row.className='task';
+          row.innerHTML = `<input type="checkbox" id="${id}"><label for="${id}"><b>${it.t}</b>${it.r?`<div class='muted'>${it.r}</div>`:''}</label>`;
+          elTasks.appendChild(row);
+        });
+        // Restore checkbox state (per day+session)
+        const key = `ml_checks_${dateISO}_${elSession.value}`;
+        const saved = JSON.parse(localStorage.getItem(key)||'[]');
+        [...elTasks.querySelectorAll('input[type=checkbox]')].forEach((c,i)=> c.checked = !!saved[i]);
+      }
 
       updateProgress();
       saveState();
@@ -276,8 +264,8 @@
       const checks = elTasks.querySelectorAll('input[type=checkbox]');
       const done = [...checks].filter(c=>c.checked).length;
       const pct = checks.length? Math.round(100*done/checks.length):0;
-      elBar.style.width = pct+'%';
-      elPct.textContent = `${pct}% complete`;
+      document.getElementById('bar').style.width = pct+'%';
+      document.getElementById('pct').textContent = `${pct}% complete`;
     }
 
     // ---------- Events ----------
@@ -295,38 +283,12 @@
     document.getElementById('printBtn').addEventListener('click',()=>window.print());
 
     ['change','input'].forEach(ev=>{
-      [elStart,elDate,elSession,document.getElementById('lockStart')].forEach(el=> el.addEventListener(ev,()=>{
-        if(el === elLock){
-          if(elLock.checked){
-            if(!elStart.value) elStart.value = PROGRAM_START_DEFAULT;
-            elStart.disabled = true;
-            localStorage.setItem('ml_start_date', elStart.value);
-          } else {
-            elStart.disabled = false;
-            localStorage.removeItem('ml_start_date');
-          }
+      [document.getElementById('lockStart'), elStart, elDate, elSession].forEach(el=> el.addEventListener(ev,()=>{
+        if(el.id === 'lockStart'){
+          elStart.disabled = el.checked;
         }
         render();
       }));
-    });
-
-    // Menu toggle & reset
-    document.getElementById('menuBtn').addEventListener('click',()=>{
-      elMenuPanel.style.display = elMenuPanel.style.display==='block' ? 'none' : 'block';
-    });
-    document.addEventListener('click', (e)=>{
-      if(!e.target.closest('.menu')) elMenuPanel.style.display='none';
-    });
-    elResetAll.addEventListener('click',(e)=>{
-      e.preventDefault();
-      localStorage.removeItem('ml_start_date');
-      const raw = JSON.parse(localStorage.getItem('ml_planner_state')||'{}');
-      delete raw.start; delete raw.startLocked;
-      localStorage.setItem('ml_planner_state', JSON.stringify(raw));
-      elLock.checked = false;
-      elStart.disabled = false;
-      elStart.value = PROGRAM_START_DEFAULT;
-      render();
     });
 
     document.addEventListener('change', e=>{
