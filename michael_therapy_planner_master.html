@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!-- Copied from existing master planner -->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Michael – Maintenance & Performance Planner</title>
+<meta name="theme-color" content="#0ea5e9" />
+<style>
+:root{--bg:#0b1220;--card:#121a2b;--muted:#8aa0c7;--text:#e9f1ff;--line:#1f2a44}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#0b1220,#0a0f1a 60%);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto}
+a{color:#9ad0ff}
+header{padding:16px 20px}
+h1{margin:0;font-size:26px}
+.sub{color:var(--muted);font-size:13px;margin-top:4px}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+input,select,button{background:#0e1729;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+button{cursor:pointer}
+.pill{display:inline-block;padding:6px 10px;border:1px solid var(--line);border-radius:999px;font-size:12px;margin:4px 6px 0 0;color:#cfe3ff}
+.h3{font-weight:700;margin:0 0 8px}
+.tasks{display:grid;gap:8px}
+.task{display:flex;gap:10px;align-items:flex-start;background:#0e1729;border:1px solid var(--line);padding:10px;border-radius:10px}
+.task input{margin-top:4px}
+.note{color:#cfd9f7;margin-top:6px}
+.progress{height:8px;background:#0e1729;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.bar{height:100%;width:0;background:linear-gradient(90deg,#34d399,#0ea5e9)}
+.section-title{display:flex;align-items:center;justify-content:space-between}
+.video-wrap{position:relative;width:100%;aspect-ratio:16/9;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#000}
+.video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+</style>
+</head>
+<body>
+<header>
+<h1>Michael – Maintenance & Performance Planner</h1>
+<div class="sub">You completed the 8-week program. This planner now runs ongoing maintenance + power.</div>
+</header>
+<div class="wrap">
+<section class="card">
+<div class="section-title"><div class="h3">Weekly Maintenance Plan</div></div>
+<div class="tasks">
+<div class="task"><label><b>2×/week – Symmetry Strength</b><div class="note">Suitcase carry, side plank, hip hikes</div></label></div>
+<div class="task"><label><b>2×/week – Shoulder Rotator Control</b><div class="note">Band ER, wall slides, Y/T/W</div></label></div>
+<div class="task"><label><b>Daily – Posture Reset</b><div class="note">Thoracic lean RIGHT, Lumbar lean LEFT</div></label></div>
+<div class="task"><label><b>Nightly – Heat → TENS → Stretch</b><div class="note">Maintain decompression routine</div></label></div>
+<div class="task"><label><b>Tennis – Controlled Progression</b><div class="note">Increase serve + forehand volume gradually</div></label></div>
+</div>
+</section>
+<section class="card">
+<div class="section-title"><div class="h3">Videos</div></div>
+<div class="video-wrap"><iframe loading="lazy" src="https://www.youtube.com/embed/videoseries?list=PLYHDe9FV2FzGePhTGZv21eKo_olmBog4I" allowfullscreen></iframe></div>
+</section>
+<section class="card">
+<div class="section-title"><div class="h3">6–12 Week Performance Plan</div></div>
+<p class="note"><b>Weeks 1–4:</b> Maintain symmetry + add controlled power (medicine ball, band-resisted serves).</p>
+<p class="note"><b>Weeks 4–8:</b> Increase dynamic rotation work + full-court hitting intensity.</p>
+<p class="note"><b>Weeks 8–12:</b> Build full performance load—serve power, lateral acceleration, full match play.</p>
+</section>
+</div>
+</body>
+</html>
